@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Syrax</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1>Syrax - Log Viewer</h1>
+                <form action="./" method="GET">
+                    <fieldset>
+                        <legend>Filter Log</legend>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-2">
+                                <label for="level">Level</label>
+                                <select id="level" name="level">
+                                    <option value="ALL" selected="">ALL</option>
+                                    <option value="DEBUG" {% if level == 'DEBUG' %}selected{%endif%}>DEBUG</option>
+                                    <option value="WARNING" {% if level == 'WARNING' %}selected{%endif%}>WARNING</option>
+                                    <option value="ERROR" {% if level == 'ERROR' %}selected{%endif%}>ERROR</option>
+                                    <option value="INFO" {% if level == 'INFO' %}selected{%endif%}>INFO</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-md-4">
+                                <label for="timestamp">Timestamp</label>
+                                <input type="date" style="margin: calc(var(--universal-margin) / 2);padding: var(--universal-padding) calc(1.5 * var(--universal-padding));" id="start" name="start" value="{{ start }}" placeholder="start"/>
+                                <input type="date" style="margin: calc(var(--universal-margin) / 2);padding: var(--universal-padding) calc(1.5 * var(--universal-padding));" id="end" name="end" value="{{ end }}" placeholder="end"/>
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <label for="message">Message</label>
+                                <input type="text" id="message" name="message" value="{{ message }}" placeholder="message"/>
+                            </div>
+                        </div>
+                        <button class="primary" type="submit">
+                            Apply
+                        </button>
+                        <button class="secondary" type="button" onclick="location.href='./'">
+                            Reset
+                        </button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="hoverable" style="border-collapse:collapse; table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="max-width: 14%;">Time</th>
+                            <th style="max-width: 4%;">Level</th>
+                            <th style="max-width: 22%;">Logger Name</th>
+                            <th style="max-width: 60%;">Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr style="max-width: 100%;">
+                            <td style="max-width: 14%;">{{ log.timestamp }}</td>
+                            <td style="max-width: 4%;">{{ log.level }}</td>
+                            <td style="max-width: 22%;">{{ log.logger_name }}</td>
+                            <td style="max-width: 60%;">{{ log.message }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
