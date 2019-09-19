@@ -1,75 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Syrax</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Syrax</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <h1>Syrax - Log Viewer</h1>
-                <form action="./" method="GET">
-                    <fieldset>
-                        <legend>Filter Log</legend>
-                        <div class="row">
-                            <div class="col-sm-12 col-md-2">
-                                <label for="level">Level</label>
-                                <select id="level" name="level">
-                                    <option value="ALL" selected="">ALL</option>
-                                    <option value="DEBUG" {% if level == 'DEBUG' %}selected{%endif%}>DEBUG</option>
-                                    <option value="WARNING" {% if level == 'WARNING' %}selected{%endif%}>WARNING</option>
-                                    <option value="ERROR" {% if level == 'ERROR' %}selected{%endif%}>ERROR</option>
-                                    <option value="INFO" {% if level == 'INFO' %}selected{%endif%}>INFO</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-12 col-md-4">
-                                <label for="timestamp">Timestamp</label>
-                                <input type="date" style="margin: calc(var(--universal-margin) / 2);padding: var(--universal-padding) calc(1.5 * var(--universal-padding));" id="start" name="start" value="{{ start }}" placeholder="start"/>
-                                <input type="date" style="margin: calc(var(--universal-margin) / 2);padding: var(--universal-padding) calc(1.5 * var(--universal-padding));" id="end" name="end" value="{{ end }}" placeholder="end"/>
-                            </div>
-                            <div class="col-sm-12 col-md-6">
-                                <label for="message">Message</label>
-                                <input type="text" id="message" name="message" value="{{ message }}" placeholder="message"/>
-                            </div>
-                        </div>
-                        <button class="primary" type="submit">
-                            Apply
-                        </button>
-                        <button class="secondary" type="button" onclick="location.href='./'">
-                            Reset
-                        </button>
-                    </fieldset>
-                </form>
+  <section class="section">
+    <div class="container is-fluid">
+      <h1 class="title">Syrax - Log Viewer</h1>
+      <div class="columns">
+        <div class="column">
+          <form action="./" method="GET">
+            <div class="field is-horizontal">
+              <div class="field-label is-normal">
+                <label class="label">Level</label>
+              </div>
+              <div class="field-body">
+                <div class="field is-narrow">
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="level" name="level">
+                        <option value="ALL" selected="">ALL</option>
+                        <option value="DEBUG" {% if ctx.level == 'DEBUG' %}selected{%endif%}>DEBUG</option>
+                        <option value="WARNING" {% if ctx.level == 'WARNING' %}selected{%endif%}>WARNING</option>
+                        <option value="ERROR" {% if ctx.level == 'ERROR' %}selected{%endif%}>ERROR</option>
+                        <option value="INFO" {% if ctx.level == 'INFO' %}selected{%endif%}>INFO</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12">
-                <table class="hoverable" style="border-collapse:collapse; table-layout: fixed;">
-                    <thead>
-                        <tr>
-                            <th style="max-width: 14%;">Time</th>
-                            <th style="max-width: 4%;">Level</th>
-                            <th style="max-width: 22%;">Logger Name</th>
-                            <th style="max-width: 60%;">Message</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in logs %}
-                        <tr style="max-width: 100%;">
-                            <td style="max-width: 14%;">{{ log.timestamp }}</td>
-                            <td style="max-width: 4%;">{{ log.level }}</td>
-                            <td style="max-width: 22%;">{{ log.logger_name }}</td>
-                            <td style="max-width: 60%;">{{ log.message }}</td>
-                        </tr>
+            <div class="field is-horizontal">
+              <div class="field-label is-normal">
+                <label class="label">Timestamp</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <p class="control is-expanded has-icons-left">
+                    <input class="input" id="start" name="start" type="date" placeholder="Start Date" value="{{ctx.start}}">
+                    <span class="icon is-small is-left">
+                      <i class="fas fa-date"></i>
+                    </span>
+                  </p>
+                </div>
+                <div class="field">
+                  <p class="control is-expanded has-icons-left">
+                    <input class="input" id="end" name="end" type="date" placeholder="End" value="{{ctx.end}}">
+                    <span class="icon is-small is-left">
+                      <i class="fas fa-date"></i>
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="field is-horizontal">
+              <div class="field-label is-normal">
+                <label class="label">Module</label>
+              </div>
+              <div class="field-body">
+                <div class="field is-narrow">
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="module" name="module">
+                        <option value="ALL" selected="">ALL</option>
+                        {% for module in ctx.modules %}
+                        <option value="{{module}}" {% if ctx.module == module %}selected{%endif%}>{{module}}</option>
                         {% endfor %}
-                    </tbody>
-                </table>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div class="field is-horizontal">
+              <div class="field-label is-normal">
+                <label class="label">Message</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input" type="text" id="message" name="message" value="{{ctx.message}}" placeholder="e.g. withdrawal">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field is-horizontal">
+              <div class="field-label is-normal">
+                <label class="label">Display</label>
+              </div>
+              <div class="field-body">
+                <div class="field is-narrow">
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="size" name="size">
+                        <option value="ALL">ALL</option>
+                        <option value="25" {% if ctx.size == 25 %}selected{%endif%}>25</option>
+                        <option value="50" {% if ctx.size == 50 %}selected{%endif%}>50</option>
+                        <option value="100" {% if ctx.size == 100 %}selected{%endif%}>100</option>
+                        <option value="250" {% if ctx.size == 250 %}selected{%endif%}>250</option>
+                        <option value="500" {% if ctx.size == 500 %}selected{%endif%}>500</option>
+                        <option value="1000" {% if ctx.size == 1000 %}selected{%endif%}>1000</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field is-horizontal">
+              <div class="field-label">
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <button type="submit" class="button is-primary is-small">
+                      Apply
+                    </button>
+                    <button class="button is-danger is-small" type="button" onclick="location.href='./'">
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <table class="table is-bordered is-striped is-narrow is-fullwidth is-hoverable" style="border-collapse:collapse; table-layout: fixed;">
+            <thead>
+              <tr>
+                <th style="width: 20%;">Time</th>
+                <th style="width: 5%;">Level</th>
+                <th style="width: 10%;">Module</th>
+                <th style="width: 60%;">Message</th>
+                <th style="width: 5%;">#</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in ctx.logs %}
+              <tr>
+                <td style="max-width: 20%;">
+                  {{ log.timestamp }}
+                </td>
+                <td>
+                  {% if log.level == 'ERROR' %}
+                  <span class="tag is-normal is-danger">{{ log.level }}</span>
+                  {% elif log.level == 'WARNING' %}
+                  <span class="tag is-normal is-warning">{{ log.level }}</span>
+                  {% elif log.level == 'INFO' %}
+                  <span class="tag is-normal is-info">{{ log.level }}</span>
+                  {% else %}
+                  <span class="tag is-normal">{{ log.level }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ log.module }}</td>
+                <td>{{ log.message }}</td>
+                <td>
+                  <button class="button is-small" onclick="showDetail('{{loop.index}}', '{{log.level}}', '{{log.module}}')">
+                    Detail
+                  </button>
+                  <input type='hidden' id='log-{{loop.index}}' value="{{log}}" />
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="modal">
+          <div class="modal-background"></div>
+          <div class="modal-card">
+            <header class="modal-card-head">
+              <p class="modal-card-title"></p>
+            </header>
+            <section class="modal-card-body">
+            </section>
+            <footer class="modal-card-foot">
+              <button class="button is-danger" id="close">Close</button>
+            </footer>
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
+  <section class="section">
+    <div class="container is-fluid">
+      <div class="columns">
+        <div class="column">
+          <footer>
+            <p>Syrax by <a href="https://meraxes.id"><strong>Meraxes</strong></a></p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    function showDetail(i, level, module) {
+      const val = document.querySelector('#log-' + i).value;
+      let modal = document.querySelector('.modal');
+      let html = document.querySelector('html');
+      html.classList.add('is-clipped');
+      modal.classList.add('is-active');
+      modal.querySelector('.modal-card-title').innerHTML = `${level} - ${module}`;
+      modal.querySelector('.modal-card-body').innerHTML = `<p>${val}</p>`;
+
+      modal.querySelector('.modal-card-foot > #close').addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.classList.remove('is-active');
+        html.classList.remove('is-clipped');
+        modal.querySelector('.modal-card-title').innerHTML = '';
+        modal.querySelector('.modal-card-body').innerHTML = '';
+      });
+    }
+  </script>
 </body>
 </html>

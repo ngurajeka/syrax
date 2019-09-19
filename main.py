@@ -25,7 +25,7 @@ def read_file_as_json(path):
             data['timestamp'] = data.pop('@timestamp')
             json_data.append(data)
         except json.decoder.JSONDecodeError as e:
-            logger.warning('failed to decode content', e)
+            logger.warning('failed to decode content: %s', content)
     return json_data
 
 def read_files(files):
@@ -44,14 +44,22 @@ def filter_end_date(x, end):
     v = parser.parse(x['timestamp'])
     return v <= end
 
+def set_module_name(x):
+    x['module'] = x['logger_name'].split('.')[1]
+    return x
+
 @app.route('/')
 def index():
     level = request.args.get('level', None)
     start = request.args.get('start', None)
     end = request.args.get('end', None)
     msg = request.args.get('message', '')
+    module = request.args.get('module', None)
+    size = request.args.get('size', '50')
 
     logs = read_files(get_files())
+    logs = list(map(set_module_name, logs))
+    modules = list(dict.fromkeys(list(map(lambda x: x['module'], logs))))
     if level and level != 'ALL':
         logs = list(filter(lambda x: x['level'] == level, logs))
     if start:
@@ -60,8 +68,26 @@ def index():
         logs = list(filter(lambda x: filter_end_date(x, end), logs))
     if msg != '':
         logs = list(filter(lambda x: msg in x['message'], logs))
+    if module and module != 'ALL':
+        logs = list(filter(lambda x: x['module'] == module, logs))
+    if size != 'ALL':
+        size = int(size)
+        logs = logs[0:size] if len(logs) > size else logs
 
-    return render_template('index.html', level=level, logs=logs, start=start, end=end, message=msg)
+    logs = sorted(logs, key=lambda x: x['timestamp'], reverse=True)
+
+    ctx = {
+        'logs': logs,
+        'level': level,
+        'modules': modules,
+        'module': module,
+        'message': msg,
+        'start': start,
+        'end': end,
+        'size': size,
+    }
+
+    return render_template('index.html', ctx=ctx)
 
 
 if __name__ == '__main__':
