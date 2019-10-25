@@ -1,18 +1,20 @@
 import json
 import logging
-from dateutil import parser
-from flask import Flask, render_template, request
 from os import listdir
 from os.path import isfile, join
 
+from dateutil import parser
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 logger = logging.getLogger('__main__')
 
 LOG_DIR = 'logs'
 
+
 def get_files():
     return [f for f in listdir(LOG_DIR) if isfile(join(LOG_DIR, f))]
+
 
 def read_file_as_json(path):
     f = open(path, "r")
@@ -28,25 +30,30 @@ def read_file_as_json(path):
             logger.warning('failed to decode content: %s', content)
     return json_data
 
+
 def read_files(files):
     json_data = []
     for file in files:
         json_data.extend(read_file_as_json(join(LOG_DIR, file)))
     return json_data
 
+
 def filter_start_date(x, start):
     start = parser.parse(start + " 00:00:00.000000+07:00")
     v = parser.parse(x['timestamp'])
     return v >= start
+
 
 def filter_end_date(x, end):
     end = parser.parse(end + " 23:59:59.000000+07:00")
     v = parser.parse(x['timestamp'])
     return v <= end
 
+
 def set_module_name(x):
     x['module'] = x['logger_name'].split('.')[1]
     return x
+
 
 @app.route('/')
 def index():
@@ -59,6 +66,7 @@ def index():
 
     logs = read_files(get_files())
     logs = list(map(set_module_name, logs))
+    logs = sorted(logs, key=lambda x: x['timestamp'], reverse=True)
     modules = list(dict.fromkeys(list(map(lambda x: x['module'], logs))))
     if level and level != 'ALL':
         logs = list(filter(lambda x: x['level'] == level, logs))
@@ -73,8 +81,6 @@ def index():
     if size != 'ALL':
         size = int(size)
         logs = logs[0:size] if len(logs) > size else logs
-
-    logs = sorted(logs, key=lambda x: x['timestamp'], reverse=True)
 
     ctx = {
         'logs': logs,
